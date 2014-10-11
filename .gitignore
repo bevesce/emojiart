@@ -1,0 +1,5 @@
+
+test_images/cuts/*
+images/*
+images/
+*.pyc
