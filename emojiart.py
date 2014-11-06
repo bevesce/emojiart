@@ -36,16 +36,8 @@ from resources.emojis import emojis
 import pickle
 from collections import OrderedDict
 
-emojis_image = Image.open('resources/emojis.png')
-width, height = emojis_image.size
 
-interval = 47
-sy = 0
-avgs = []
-i = 0
-
-
-def load_or_create(filename, create):
+def _load_or_create(filename, create):
     try:
         with open(filename) as f:
             return pickle.load(f)
@@ -95,72 +87,89 @@ def convert_emojis_to_colors():
     emoji_colors_with_alpha = []
     while base_y + emoji_height < height:
         avgs = AvgColor(['red', 'green', 'blue'])
-        avgsa = AvgColor(['red', 'green', 'blue', 'alpha'])
         # cut = emojis_image.crop([0, base_y, width, base_y + emoji_height])
         # cut.save('test_images/cuts/{}.png'.format(processed_emojis_counter), 'PNG')
         for x in range(0, width):
             for y in range(base_y, base_y + emoji_height):
                 pixel = emojis_image.getpixel((x, y))
-                if pixel[3]:
-                    avgsa.add(pixel)
                 if pixel[3] == 255:
                     avgs.add(pixel)
         emoji_colors.append(avgs.calculate())
-        emoji_colors_with_alpha.append(avgsa.calculate())
         processed_emojis_counter += 1
         base_y += emoji_height
     # _create_emojis_colors_test_image(
     #     emoji_colors, width, emoji_height, 'emoji_colors.png')
     # _create_emojis_colors_test_image(
     #     emoji_colors_with_alpha, width, emoji_height, 'emoji_colors_alpha.png')
-    return emoji_colors, emoji_colors_with_alpha
+    return emoji_colors
 
 
-def _get_pixels(im):
-    width, height = im.size
+def get_emoji_average_colors():
+    emoji_colors = _load_or_create(
+        'resources/emoji_colors.pickle',
+        convert_emojis_to_colors
+    )
+    return emoji_colors
+
+
+def print_emojis(filename, scale=1.0, height_to_width=1.8):
+    emoji_art = gen_emoji_art(filename, scale, height_to_width)
+    print emoji_art.encode('utf-8')
+
+
+def gen_emoji_art(filename, scale=1.0, height_to_width=1.8):
+    orginal_size_image = Image.open(filename)
+    image = _resize_image(orginal_size_image, scale, height_to_width)
+    pixels = _get_pixels(image)
+    matched_symbols = _convert_pixels_to_symbols(pixels)
+    return _format_symbols_to_size(matched_symbols, image.size)
+
+
+def _resize_image(image, scale, height_to_width):
+    width, height = image.size
+    new_width, new_height = int(width * scale * height_to_width), int(height * scale)
+    return image.resize((new_width, new_height))
+
+
+def _get_pixels(image):
+    width, height = image.size
     pixels = []
     for y in range(0, height):
         for x in range(0, width):
-            pixels.append(im.getpixel((x, y)))
+            pixels.append(image.getpixel((x, y)))
     return pixels
 
 
-def _fix_pixel(p, include_alpha):
-    if include_alpha:
-        return p
+def _convert_pixels_to_symbols(pixels):
+    nearest_emojis = _find_nearest_emojis(pixels)
+    matched_symbols = [e if _is_visible(p) else u' ' for e, p in zip(nearest_emojis, pixels)]
+    return matched_symbols
+
+
+def _find_nearest_emojis(pixels):
+    emoji_colors = get_emoji_average_colors()
+    colors_kd_tree = kd.KDTree(emoji_colors)
+    nearest_emoji_indices = colors_kd_tree.query([_exclude_alpha(p) for p in pixels])[1]
+    nearest_emojis = [emojis[i] if i < len(emojis) else u' ' for i in nearest_emoji_indices]
+    return nearest_emojis
+
+
+def _exclude_alpha(p):
     return p[:3]
 
 
-def _test_alpha(p):
+def _is_visible(p):
     if len(p) <= 3:
         return True
     return p[3]
 
 
-def print_emojis(filename, include_alpha=False, scale=1.0, height_to_width=1.8):
-    emoji_colors, emoji_colors_with_alpha = load_or_create(
-        'resources/emoji_colors.pickle',
-        convert_emojis_to_colors
-    )
-    if filename.lower().endswith('jpg') or filename.lower().endswith('jpeg'):
-        include_alpha = False
-    emoji_colors = emoji_colors_with_alpha if include_alpha else emoji_colors
-
-    im = Image.open(filename)
-    width, height = im.size
-    width, height = int(width * scale * height_to_width), int(height * scale)
-    im = im.resize((width, height))
-
-    pixels = _get_pixels(im)
-    colors = kd.KDTree(emoji_colors)
-    nearest_emoji_indices = colors.query([_fix_pixel(p, include_alpha) for p in pixels])[1]
-    no_emojis = len(emojis)
-    matched_emojis = [emojis[i] if i < no_emojis else u' ' for i in nearest_emoji_indices]
-    # when alpha = 0 use white space
-    matched_symbols = [e if _test_alpha(p) else u' ' for e, p in zip(matched_emojis, pixels)]
-
+def _format_symbols_to_size(matched_symbols, size):
+    width, height = size
+    rows = []
     for i in range(0, width * height, width):
-        print ''.join(matched_symbols[i:i + width]).encode('utf-8')
+        rows.append(''.join(matched_symbols[i:i + width]))
+    return u'\n'.join(rows)
 
 
 if __name__ == '__main__':
