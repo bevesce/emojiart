@@ -259,7 +259,7 @@ class EmojiArt(AsciiArt):
         return emojis[index]
 
 __doc__ = u"""
-Create ascii art.
+Convert images to aciiart-like text with unicode symbols or emojis.
 
               ▒▒▒▓▓▓▓▓▓▓▒▒▒
            ▒▒▓▓▓██████████▓▓▒▒
@@ -290,7 +290,7 @@ Options:
     -b --black_on_white             Reverse symbols set
     -e --edges                      Ascii art is created only from edges
     -i --fill                       Ascii art contains edges
-    -j --emoji                      Emoji art
+    -j --emoji                      Use emojis
     -g=<gs> --gauss=<gs>            Size of Gauss blur to use when finding edges [default: 0]
 """.format(', '.join(AsciiArt.symbols_sets.keys()))
 
