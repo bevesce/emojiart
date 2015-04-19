@@ -37,3 +37,5 @@ Options:
     -j --emoji                      Use emojis
     -g=<gs> --gauss=<gs>            Size of Gauss blur to use when finding edges [default: 0]
 ```
+
+![emojiart](http://procrastinationlog.net/images/asciiart.png)
