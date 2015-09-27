@@ -1,6 +1,6 @@
 # Emojiart
 
-![emojiart](http://procrastinationlog.net/images/emojiart.png)
+![emojiart](images/emojiart.png)
 
 Convert images to aciiart-like text with unicode symbols or emojis.
 
@@ -38,4 +38,4 @@ Options:
     -g=<gs> --gauss=<gs>            Size of Gauss blur to use when finding edges [default: 0]
 ```
 
-![emojiart](http://procrastinationlog.net/images/asciiart.png)
+![emojiart](images/asciiart.png)
