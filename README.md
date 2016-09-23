@@ -23,7 +23,7 @@ Convert images to aciiart-like text with unicode symbols or emojis.
                  ░░▒▒▒░░
 
 Usage:
-    textart.py [-s=<sc>] [-f=<fs>] [-c=<na>] [-b] [-g=<gs>] [-e] [-i] [-j] [-w=<ws>] <path_to_image>
+    emojiart.py [-s=<sc>] [-f=<fs>] [-c=<na>] [-b] [-g=<gs>] [-e] [-i] [-j] [-w=<ws>] <path_to_image>
 
 Options:
     -h --help                       Show this screen
