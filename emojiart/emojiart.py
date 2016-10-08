@@ -305,7 +305,7 @@ if __name__ == '__main__':
         cls = FillAsciiArt
     if arguments['--emoji']:
         cls = EmojiArt
-    print cls(
+    print(cls(
         image,
         width=int(arguments['--width'] if arguments['--width'] else 0),
         scale=float(arguments['--scale']),
@@ -313,4 +313,4 @@ if __name__ == '__main__':
         symbols_set_name=arguments['--symbols_set'],
         black_on_white=arguments['--black_on_white'],
         gauss_blur=float(arguments['--gauss'])
-    )
+    ))
